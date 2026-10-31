@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Future Presents</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Exo+2:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  /* Dark-only on purpose: a neon, deep-space look. */
+  :root{
+    color-scheme:dark;
+    --void:#04050d;
+    --deep:#0a0d1f;
+    --panel:rgba(16, 22, 48, .62);
+    --panel-solid:#101630;
+    --edge:rgba(120, 200, 255, .22);
+    --text:#e6f1ff;
+    --dim:#8a9bc4;
+    --cyan:#3ef2ff;
+    --magenta:#ff3ec8;
+    --violet:#8b5cff;
+    --lime:#9dff6b;
+    --glow-c:0 0 18px rgba(62, 242, 255, .45);
+    --glow-m:0 0 18px rgba(255, 62, 200, .45);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    min-height:100vh;
+    background:radial-gradient(1200px 700px at 80% -10%, rgba(139, 92, 255, .25), transparent 60%),
+               radial-gradient(900px 600px at -10% 20%, rgba(62, 242, 255, .14), transparent 60%),
+               var(--void);
+    color:var(--text);
+    font-family:"Exo 2", "Segoe UI", Arial, sans-serif;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  .mono{font-family:"Share Tech Mono", ui-monospace, Consolas, monospace; letter-spacing:.06em;}
+  button{font:inherit; color:inherit;}
+  a{color:inherit;}
+  [hidden]{display:none !important;}
+  :focus-visible{outline:2px solid var(--cyan); outline-offset:3px;}
+
+  /* ---------- backdrop ---------- */
+  #stars{position:fixed; inset:0; width:100%; height:100%; z-index:0; pointer-events:none;}
+  .grid-floor{
+    position:fixed; left:-50%; right:-50%; bottom:-10vh; height:55vh; z-index:0; pointer-events:none;
+    background-image:
+      linear-gradient(rgba(62, 242, 255, .35) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(62, 242, 255, .35) 1px, transparent 1px);
+    background-size:60px 60px;
+    transform:perspective(420px) rotateX(62deg);
+    transform-origin:center top;
+    mask-image:linear-gradient(to top, rgba(0,0,0,.7), transparent 85%);
+    -webkit-mask-image:linear-gradient(to top, rgba(0,0,0,.7), transparent 85%);
+    animation:floor 6s linear infinite;
+    opacity:.45;
+  }
+  @keyframes floor{to{background-position:0 60px, 0 0;}}
+  .scan{
+    position:fixed; inset:0; z-index:1; pointer-events:none;
+    background:repeating-linear-gradient(to bottom, rgba(255,255,255,.025) 0 1px, transparent 1px 3px);
+  }
+  .page{position:relative; z-index:2;}
+
+  /* ---------- HUD bar ---------- */
+  .hud{
+    position:sticky; top:0; z-index:20;
+    display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+    padding:12px 28px;
+    background:rgba(4, 5, 13, .72);
+    backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--edge);
+  }
+  .logo{font-family:"Orbitron", sans-serif; font-weight:900; font-size:.95rem; letter-spacing:.18em;}
+  .logo b{color:var(--cyan); text-shadow:var(--glow-c);}
+  .logo i{font-style:normal; color:var(--magenta); text-shadow:var(--glow-m);}
+  .hud-right{display:flex; align-items:center; gap:16px; font-size:.78rem; color:var(--dim);}
+  .online{display:inline-flex; align-items:center; gap:7px; color:var(--lime);}
+  .online::before{content:""; width:7px; height:7px; border-radius:50%; background:var(--lime); box-shadow:0 0 10px var(--lime); animation:blink 1.6s ease-in-out infinite;}
+  @keyframes blink{50%{opacity:.3;}}
+
+  /* ---------- hero ---------- */
+  .wrap{max-width:1180px; margin:0 auto; padding:0 28px;}
+  .hero{padding:70px 0 34px; position:relative;}
+  .tag{display:inline-block; font-size:.78rem; color:var(--cyan); border:1px solid rgba(62,242,255,.4); padding:5px 12px; border-radius:2px; margin-bottom:22px; background:rgba(62,242,255,.06);}
+  h1{
+    font-family:"Orbitron", sans-serif; font-weight:900;
+    font-size:clamp(2.4rem, 7.5vw, 5.6rem); line-height:.95; letter-spacing:.02em;
+    margin:0 0 16px; text-transform:uppercase;
+    background:linear-gradient(100deg, var(--cyan) 0%, #a6f8ff 30%, var(--violet) 60%, var(--magenta) 100%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    filter:drop-shadow(0 0 22px rgba(139, 92, 255, .35));
+  }
+  .sub{font-size:1.15rem; color:var(--dim); max-width:46ch; margin:0 0 34px;}
+  .readouts{display:flex; flex-wrap:wrap; gap:14px;}
+  .readout{
+    position:relative; min-width:150px; padding:14px 18px 12px;
+    background:var(--panel); border:1px solid var(--edge);
+    clip-path:polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+  }
+  .readout small{display:block; font-size:.7rem; color:var(--dim); margin-bottom:4px;}
+  .readout b{font-family:"Orbitron", sans-serif; font-weight:700; font-size:1.7rem; color:var(--cyan); text-shadow:var(--glow-c); font-variant-numeric:tabular-nums;}
+  .readout.m b{color:var(--magenta); text-shadow:var(--glow-m);}
+  .readout.l b{color:var(--lime); text-shadow:0 0 16px rgba(157,255,107,.5);}
+
+  /* ---------- controls ---------- */
+  .controls{display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; margin:26px 0 26px; padding-top:18px; border-top:1px solid var(--edge);}
+  .seg{display:inline-flex; border:1px solid var(--edge); border-radius:3px; overflow:hidden;}
+  .seg button{background:transparent; border:0; padding:8px 14px; font-size:.78rem; color:var(--dim); cursor:pointer;}
+  .seg button + button{border-left:1px solid var(--edge);}
+  .seg button[aria-pressed="true"]{background:rgba(62,242,255,.14); color:var(--cyan); text-shadow:var(--glow-c);}
+  .toggle{display:inline-flex; align-items:center; gap:10px; font-size:.78rem; color:var(--dim); cursor:pointer; background:none; border:0; padding:4px;}
+  .toggle .sw{width:36px; height:18px; border-radius:9px; border:1px solid var(--edge); position:relative; transition:background .2s;}
+  .toggle .sw::after{content:""; position:absolute; top:2px; left:2px; width:12px; height:12px; border-radius:50%; background:var(--dim); transition:transform .2s, background .2s;}
+  .toggle[aria-pressed="true"] .sw{background:rgba(255,62,200,.2); border-color:rgba(255,62,200,.6);}
+  .toggle[aria-pressed="true"] .sw::after{transform:translateX(18px); background:var(--magenta); box-shadow:var(--glow-m);}
+
+  /* ---------- cards ---------- */
+  .grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(250px, 1fr)); gap:22px; padding-bottom:80px;}
+  .card{
+    position:relative;
+    display:flex; flex-direction:column;
+    background:var(--panel);
+    backdrop-filter:blur(10px);
+    border:1px solid var(--edge);
+    clip-path:polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px));
+    transition:transform .25s ease, border-color .25s, box-shadow .25s;
+    animation:rise .6s cubic-bezier(.2,.8,.2,1) both;
+    animation-delay:var(--d);
+  }
+  @keyframes rise{from{opacity:0; transform:translateY(16px);}}
+  .card::before{
+    content:""; position:absolute; inset:0; pointer-events:none;
+    background:linear-gradient(135deg, rgba(62,242,255,.5), transparent 30%, transparent 70%, rgba(255,62,200,.5));
+    -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor; mask-composite:exclude;
+    padding:1px; opacity:.6; transition:opacity .25s;
+  }
+  .card:hover{transform:translateY(-4px);}
+  .card:hover::before{opacity:1;}
+  .card-top{display:flex; justify-content:space-between; align-items:center; padding:12px 16px 0; font-size:.72rem; color:var(--dim);}
+  .card-top .store{color:var(--cyan);}
+  .pad{
+    position:relative; margin:10px 14px 0; height:200px;
+    border-radius:4px;
+    background:radial-gradient(circle at 50% 45%, #ffffff 0%, #eef6ff 55%, #cfe2ff 100%);
+    display:grid; place-items:center; overflow:hidden;
+  }
+  .pad img{max-width:86%; max-height:86%; object-fit:contain; mix-blend-mode:multiply; transition:filter .3s, opacity .3s;}
+  .pad::after{
+    content:""; position:absolute; left:0; right:0; height:40%; top:-40%;
+    background:linear-gradient(to bottom, transparent, rgba(62,242,255,.22), transparent);
+    animation:sweep 4.5s ease-in-out infinite; animation-delay:var(--d);
+  }
+  @keyframes sweep{0%,55%{top:-40%;} 100%{top:110%;}}
+  .acq{
+    position:absolute; inset:0; z-index:2;
+    display:grid; place-items:center;
+    background:repeating-linear-gradient(-45deg, rgba(4,5,13,.72) 0 10px, rgba(4,5,13,.6) 10px 20px);
+    opacity:0; transition:opacity .3s;
+  }
+  .acq span{
+    font-family:"Orbitron", sans-serif; font-weight:900; font-size:1.15rem; letter-spacing:.2em;
+    color:var(--lime); text-shadow:0 0 14px rgba(157,255,107,.8);
+    border:2px solid var(--lime); padding:6px 14px; transform:rotate(-8deg);
+  }
+  .card.got .acq{opacity:1;}
+  .card.got .pad img{filter:grayscale(1);}
+  .body{padding:14px 16px 16px; display:flex; flex-direction:column; gap:10px; flex:1;}
+  .name{font-weight:600; font-size:1.05rem; line-height:1.3; margin:0;}
+  .name a{text-decoration:none;}
+  .name a:hover{color:var(--cyan); text-shadow:var(--glow-c);}
+  .name svg{width:11px; height:11px; margin-left:4px; opacity:.6; vertical-align:1px;}
+  .reqs{display:flex; flex-wrap:wrap; gap:6px;}
+  .reqs span{font-size:.7rem; color:var(--magenta); border:1px solid rgba(255,62,200,.45); padding:2px 8px; border-radius:2px; background:rgba(255,62,200,.07);}
+  .foot{margin-top:auto; display:flex; align-items:center; justify-content:space-between; gap:10px; padding-top:4px;}
+  .price{font-family:"Orbitron", sans-serif; font-weight:700; font-size:1.45rem; color:var(--cyan); text-shadow:var(--glow-c);}
+  .got-btn{
+    background:transparent; border:1px solid rgba(157,255,107,.55); color:var(--lime);
+    padding:7px 12px; border-radius:2px; font-size:.72rem; cursor:pointer;
+    transition:background .2s, box-shadow .2s;
+  }
+  .got-btn:hover{background:rgba(157,255,107,.12); box-shadow:0 0 14px rgba(157,255,107,.35);}
+  .card.got .got-btn{background:var(--lime); color:var(--void);}
+
+  .empty{
+    grid-column:1 / -1; text-align:center; padding:60px 20px;
+    border:1px dashed var(--edge); color:var(--dim);
+  }
+  .empty h2{font-family:"Orbitron", sans-serif; font-size:1.2rem; letter-spacing:.14em; color:var(--text); margin:14px 0 6px;}
+  .empty svg{width:60px; height:60px; color:var(--cyan); filter:drop-shadow(var(--glow-c));}
+
+  footer{text-align:center; padding:0 20px 50px; font-size:.75rem; color:var(--dim);}
+
+  @media (max-width:640px){
+    .hud{padding:10px 16px;}
+    .wrap{padding:0 16px;}
+    .hero{padding:44px 0 24px;}
+    .hud-right .clock{display:none;}
+    .readout{min-width:0; flex:1 1 40%;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .grid-floor,.card,.pad::after,.online::before{animation:none !important;}
+  }
+</style>
+</head>
+<body>
+<canvas id="stars" aria-hidden="true"></canvas>
+<div class="grid-floor" aria-hidden="true"></div>
+<div class="scan" aria-hidden="true"></div>
+
+<div class="page">
+  <header class="hud mono">
+    <div class="logo">FUTURE<b>//</b>PRESENTS<i>_</i></div>
+    <div class="hud-right">
+      <span class="clock" id="clock"></span>
+      <span class="online">ONLINE</span>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero">
+      <div class="tag mono">&gt; GIFT_IDEAS.DB // SAVED FOR LATER</div>
+      <h1>Future<br>Presents</h1>
+      <p class="sub">Gift ideas, saved for later. Things to ask for someday.</p>
+      <div class="readouts mono">
+        <div class="readout"><small>ITEMS</small><b id="rCount">0</b></div>
+        <div class="readout m"><small>TOTAL VALUE</small><b id="rTotal">$0</b></div>
+        <div class="readout l"><small>ACQUIRED</small><b id="rGot">0</b></div>
+      </div>
+    </section>
+
+    <div class="controls mono" id="controls">
+      <div class="seg" role="group" aria-label="Sort">
+        <button data-sort="new" aria-pressed="true">NEWEST</button>
+        <button data-sort="low" aria-pressed="false">PRICE &uarr;</button>
+        <button data-sort="high" aria-pressed="false">PRICE &darr;</button>
+      </div>
+      <button class="toggle" id="hideGot" aria-pressed="false"><span class="sw"></span>HIDE ACQUIRED</button>
+    </div>
+
+    <section class="grid" id="grid"></section>
+  </main>
+
+  <footer class="mono">END OF TRANSMISSION // FUTURE PRESENTS</footer>
+</div>
+
+<script>
+// Newest ideas go at the bottom of this list; "Newest" sort shows them first.
+const GIFTS = [
+];
+
+const GOT_KEY = "future_presents_got";
+const PREF_KEY = "future_presents_prefs";
+const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const $ = id=>document.getElementById(id);
+
+function readLocal(key, fallback){
+  try{ const v = localStorage.getItem(key); return v === null ? fallback : JSON.parse(v); }catch(e){ return fallback; }
+}
+function writeLocal(key, value){
+  try{ localStorage.setItem(key, JSON.stringify(value)); }catch(e){}
+}
+
+let got = readLocal(GOT_KEY, {});
+let prefs = Object.assign({sort:"new", hideGot:false}, readLocal(PREF_KEY, {}));
+
+function esc(s){
+  return String(s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+function storeOf(url){
+  try{
+    const host = new URL(url).hostname.replace(/^www\./, "");
+    const known = {amazon:"AMAZON", target:"TARGET", walmart:"WALMART", shopzoki:"ZOKI", etsy:"ETSY"};
+    for(const k in known) if(host.includes(k)) return known[k];
+    return host.split(".")[0].toUpperCase();
+  }catch(e){ return ""; }
+}
+
+/* ---------- clock ---------- */
+function tick(){
+  const d = new Date();
+  const p = n=>String(n).padStart(2, "0");
+  $("clock").textContent = `${d.getFullYear()}.${p(d.getMonth() + 1)}.${p(d.getDate())} // ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+}
+
+/* ---------- starfield ---------- */
+function initStars(){
+  const c = $("stars"), ctx = c.getContext("2d");
+  let w, h, stars = [];
+  function size(){
+    const dpr = window.devicePixelRatio || 1;
+    w = innerWidth; h = innerHeight;
+    c.width = w * dpr; c.height = h * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    stars = Array.from({length:Math.round(w * h / 5000)}, ()=>({
+      x:Math.random() * w, y:Math.random() * h, r:Math.random() * 1.3 + .2,
+      t:Math.random() * Math.PI * 2, s:.01 + Math.random() * .03,
+      hue:Math.random() < .15 ? (Math.random() < .5 ? "62,242,255" : "255,62,200") : "220,235,255",
+    }));
+  }
+  function draw(){
+    ctx.clearRect(0, 0, w, h);
+    for(const s of stars){
+      s.t += s.s;
+      const a = reduceMotion ? .7 : .35 + Math.abs(Math.sin(s.t)) * .65;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${s.hue},${a})`;
+      ctx.fill();
+    }
+    if(!reduceMotion) requestAnimationFrame(draw);
+  }
+  size(); draw();
+  addEventListener("resize", ()=>{ size(); if(reduceMotion) draw(); });
+}
+
+/* ---------- render ---------- */
+const ARROW = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 11l6-6M6 5h5v5"/></svg>';
+
+function cardHTML(g, n){
+  const isGot = !!got[g.id];
+  const store = storeOf(g.url);
+  return `<article class="card${isGot ? " got" : ""}" data-id="${esc(g.id)}" style="--d:${(n * .05).toFixed(2)}s">
+    <div class="card-top mono"><span>ITEM_${String(g.no).padStart(2, "0")}</span><span class="store">${esc(store)}</span></div>
+    <div class="pad">
+      <img src="${esc(g.img)}" alt="${esc(g.name)}" loading="lazy">
+      <div class="acq"><span>ACQUIRED</span></div>
+    </div>
+    <div class="body">
+      <h3 class="name"><a href="${esc(g.url)}" target="_blank" rel="noopener noreferrer">${esc(g.name)}${ARROW}</a></h3>
+      ${g.reqs.length ? `<div class="reqs mono">${g.reqs.map(r=>`<span>${esc(r)}</span>`).join("")}</div>` : ""}
+      <div class="foot">
+        <span class="price">$${g.price}</span>
+        <button class="got-btn mono" data-id="${esc(g.id)}" aria-pressed="${isGot}">${isGot ? "ACQUIRED &#10003;" : "MARK ACQUIRED"}</button>
+      </div>
+    </div>
+  </article>`;
+}
+
+function render(){
+  const numbered = GIFTS.map((g, i)=>({...g, no:i + 1}));
+  let shown = numbered.slice();
+  if(prefs.sort === "new") shown.reverse();
+  if(prefs.sort === "low") shown.sort((a, b)=>a.price - b.price);
+  if(prefs.sort === "high") shown.sort((a, b)=>b.price - a.price);
+  if(prefs.hideGot) shown = shown.filter(g=>!got[g.id]);
+
+  $("grid").innerHTML = shown.length ? shown.map(cardHTML).join("") : `<div class="empty">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 6.6L21 9l-5.2 4.2L17.6 20 12 16.3 6.4 20l1.8-6.8L3 9l6.6-.4z"/></svg>
+      <h2 class="mono">${GIFTS.length ? "ALL IDEAS ACQUIRED" : "NO TRANSMISSIONS YET"}</h2>
+      <div>${GIFTS.length ? "Turn off &ldquo;hide acquired&rdquo; to see them." : "Gift ideas will appear here soon."}</div>
+    </div>`;
+
+  const total = GIFTS.reduce((s, g)=>s + g.price, 0);
+  $("rCount").textContent = GIFTS.length;
+  $("rTotal").textContent = "$" + total;
+  $("rGot").textContent = GIFTS.filter(g=>got[g.id]).length;
+  $("controls").hidden = GIFTS.length < 2;
+
+  document.querySelectorAll("[data-sort]").forEach(b=>b.setAttribute("aria-pressed", b.dataset.sort === prefs.sort));
+  $("hideGot").setAttribute("aria-pressed", prefs.hideGot);
+}
+
+$("grid").addEventListener("click", e=>{
+  const b = e.target.closest(".got-btn");
+  if(!b) return;
+  const id = b.dataset.id;
+  if(got[id]) delete got[id]; else got[id] = true;
+  writeLocal(GOT_KEY, got);
+  if(prefs.hideGot) return render();
+  const card = b.closest(".card");
+  const isGot = !!got[id];
+  card.classList.toggle("got", isGot);
+  b.setAttribute("aria-pressed", isGot);
+  b.innerHTML = isGot ? "ACQUIRED &#10003;" : "MARK ACQUIRED";
+  $("rGot").textContent = GIFTS.filter(g=>got[g.id]).length;
+});
+document.querySelectorAll("[data-sort]").forEach(b=>b.addEventListener("click", ()=>{
+  prefs.sort = b.dataset.sort; writeLocal(PREF_KEY, prefs); render();
+}));
+$("hideGot").addEventListener("click", ()=>{
+  prefs.hideGot = !prefs.hideGot; writeLocal(PREF_KEY, prefs); render();
+});
+
+tick(); setInterval(tick, 1000);
+initStars();
+render();
+</script>
+</body>
+</html>
